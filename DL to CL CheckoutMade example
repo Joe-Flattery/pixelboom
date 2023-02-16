@@ -1,0 +1,80 @@
+<!-- Purchase Code -->
+<script class="cl_checkout_made">
+    function clProductsConversion(productsData){
+        var products = [];
+        for(var cli in  productsData){
+            var product = productsData[cli];
+            var newproduct = {};
+            for(prodkey in product){
+                switch(prodkey){
+                case "id":
+                    newproduct["product_id"] = product[prodkey];
+                    break;
+                case "name": 
+                    newproduct["product_name"] = product[prodkey];
+                    break;
+                case "price":
+                    newproduct["product_price"] = product[prodkey];
+                    break;
+                case "brand":
+                    newproduct["product_brand"] = product[prodkey];
+                    break;
+                case "category":
+                    newproduct["product_category"] = product[prodkey];
+                    break;
+                case "image":
+                    newproduct["product_image"]= product[prodkey]
+                default:
+                    newproduct["product_" + prodkey] = product[prodkey];
+                    break;
+                }
+            }
+            products.push(newproduct);
+        }
+        return products;
+    };
+    
+    function getProductValue(productsData){
+        var val = 0;
+        for(var cli in  productsData){
+            var product = productsData[cli];
+            var qty = 1;
+            if(product["quantity"]){
+                try{
+                    qty = Number(product["quantity"]);
+                }catch(e){}
+            }
+            var price = Number(product["price"])
+            var product_price = qty * price
+            val = val + product_price 
+        }
+        return val
+    }; 
+    if(!window.cl_checkout_made){
+        window.cl_checkout_made = setInterval(function(){
+            if(((window.CLabsgbVar || {}).generalProps || {}).uid){   
+                var ecommerceEvent = window.google_tag_manager["GTM-KWGWK95"].dataLayer.get("ecommerce");
+                var properties = {}
+                var value = getProductValue(ecommerceEvent.items)
+                properties["customProperties"] = {
+                    "currency": {
+                        "t": "string",
+                        "v": ecommerceEvent["currency"]
+                    },
+                    "content_type": {
+                        "t": "string",
+                        "v": "product_group"
+                    },
+                    "value":  {
+                        "t": "number",
+                        "v": value
+                    }
+                }
+                properties["productProperties"] = clProductsConversion(ecommerceEvent.items)
+                _cl.trackClick("Checkout made", properties);
+                clearInterval(cl_checkout_made)    
+            }
+        }, 1000);
+
+    }  
+</script>
