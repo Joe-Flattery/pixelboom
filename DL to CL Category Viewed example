@@ -1,0 +1,19 @@
+<!-- Purchase Code -->
+<script class="cl_category_viewed">
+    if(!window.cl_category_viewed){
+        window.cl_category_viewed = setInterval(function(){
+            if(((window.CLabsgbVar || {}).generalProps || {}).uid){   
+                var ecommerceEvent = window.google_tag_manager["GTM-KWGWK95"].dataLayer.get("category");
+                var properties = {}
+                properties["customProperties"] = {
+                    "category_name": {
+                        "t": "string",
+                        "v": ecommerceEvent["name"]
+                    }
+                };
+                _cl.pageview("Category viewed", properties);
+                clearInterval(cl_category_viewed)    
+            }
+        }, 1000);
+    }   
+</script>
