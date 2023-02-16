@@ -1,0 +1,82 @@
+<!-- Purchase Code -->
+<script>
+    if(!window._cl_purchase_event){
+        var clProductsConversion = function(productsData){
+            var products = [];
+            for(var cli in  productsData){
+                var product = productsData[cli];
+                var newproduct = {};
+                for(prodkey in product){
+                    switch(prodkey){
+                    case "item_id":
+                        newproduct["product_id"] = product[prodkey];
+                        break;
+                    case "item_name": 
+                        newproduct["product_name"] = product[prodkey];
+                        break;
+                    case "price":
+                        newproduct["product_price"] = product[prodkey];
+                        break;
+                    case "quantity":
+                        newproduct["product_brand"] = product[prodkey];
+                        break;
+                    case "category":
+                        newproduct["product_category"] = product[prodkey];
+                        break;
+                    case "image_url":
+                        newproduct["product_image"]= product[prodkey];
+                        break;
+                    default:
+                        newproduct["product_" + prodkey] = product[prodkey];
+                        break;
+                    }
+                }
+                products.push(newproduct);
+            }
+            return products;
+        };
+        window._cl_purchase_event = setInterval(function(){
+            if(((window.CLabsgbVar || {}).generalProps || {}).uid){
+                var ecommerceEvent = window.google_tag_manager["GTM-KWGWK95"].dataLayer.get("ecommerce");
+                var properties = {};
+                properties["customProperties"] = {
+                    "currency": {
+                        "t": "string",
+                        "v":  ecommerceEvent.purchase.currency
+                    },
+                    "content_type": {
+                        "t": "string",
+                        "v": "product_group"
+                    },
+                    "value":  {
+                        "t": "number",
+                        "v": ecommerceEvent.purchase.value
+                    },
+                    "revenue":  {
+                        "t": "number",
+                        "v": ecommerceEvent.purchase.value
+                    },
+                    "shipping":  {
+                        "t": "string",
+                        "v": ecommerceEvent.purchase.shipping
+                    },
+                    "tax":  {
+                        "t": "string",
+                        "v": ecommerceEvent.purchase.tax
+                    },
+                    "transaction_id": {
+                        "t": "string",      
+                        "v": ecommerceEvent.purchase.transaction_id
+                    },
+                    "coupon_code": {
+                        "t": "string",      
+                        "v": ecommerceEvent.purchase.coupon
+                    }
+                }
+                properties["productProperties"] = clProductsConversion(ecommerceEvent.purchase.items)
+                _cl.pageview("Purchased", properties)
+                clearInterval(_cl_purchase_event)
+            }
+        }, 1000);
+    }
+    </script>
