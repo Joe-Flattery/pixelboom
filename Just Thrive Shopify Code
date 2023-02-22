@@ -1,8 +1,10 @@
+Place This first file inside of Customer Events
+
 /**
  * Pixelboom Tracking code - Custom pixel code for shopify 
 * */
 
-!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)}n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.pixelboom.co/cl4690gkdldyat.js","_cl");_cl.SNIPPET_VERSION="1.0.0";_cl.SANDBOX_ENV=true;
+!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)}n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.pixelboom.co/cl44961zb0idem.js","_cl");_cl.SNIPPET_VERSION="1.0.0";_cl.SANDBOX_ENV=true;
 
 /**
 * @variable  __CL__ contains debug and fb_skip_contents
@@ -338,7 +340,7 @@ window.clShopifyTrack = function() {
             },
             "shipping_price":{
                 "t": "number",
-                "v": event.data.checkout.shippingLine.amount
+                "v": event.data.checkout.shippingLine.price.amount
             },
             "tax": {
                 "t": "string",
@@ -360,58 +362,290 @@ window.clShopifyTrack = function() {
             console.log("AddPaymentInfo"+" :"+JSON.stringify(properties));
         } 
     });
-    //Purchased event
-    analytics.subscribe("checkout_completed", event => {
-        var products = shopify_products_mapping(event.data.checkout.lineItems);
-        var productData = clabs_product_mappings(products);
-        var shippingDetails = event.data.checkout.shippingPrice || event.data.checkout.shippingLine
-        var customData = {
-            "transaction_number":{
-                "t": "string",
-                "v": event.data.checkout.order.id
-            },
-            "currency": {
-                "t": "string",
-                "v": (event.data.checkout.totalPrice || {}).currencyCode
-            },
-            "subtotal": {
-                "t": "number",
-                "v": (event.data.checkout.subtotalPrice || {}).amount || 0
-            },
-            "tax" : {
-                "t": "number",
-                "v": (event.data.checkout.totalTax || {}).amount || 0
-            },
-            "shipping" : {
-                "t": "number",
-                "v": shippingDetails && shippingDetails.amount || 0
-            },
-            "value":{
-                "t": "number",
-                "v": (event.data.checkout.totalPrice || {}).amount || 0
-            }
-        }
-        var properties = {
-            "customProperties"  : customData,
-            "productProperties" : productData
-        };
-        var propertiesToSend = identify_properties_to_send(event);
-        _cl.identify(propertiesToSend);
-        if(customData.transaction_number && customData.transaction_number.v && window.localStorage){
-            var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
-            var purchases = JSON.parse(purchases_str);
-            if(!purchases[customData.transaction_number.v]){
-                _cl.trackClick("Purchased",properties);
-                purchases[customData.transaction_number.v] = "true";
-                window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
-            }
-
-        }else{
-            _cl.trackClick("Purchased",properties);
-        }
-        if (__CL__.debug) {
-            console.log("Purchased"+" :"+JSON.stringify(properties));
-        } 
-    });
 }
 //End of the Pixelboom custom pixel code
+
+
+
+
+Place the Next code in the Order Status Page additional scripts
+
+<!-- Pixelboom Tag --><script>!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)};n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.pixelboom.co/cl44961zb0idem.js","_cl");_cl.SNIPPET_VERSION="1.0.0"</script>
+<script id="cl_additional_order_status_script" type="text/javascript">
+    var clearObject = function(obj){
+        var newObj = Object.assign({}, obj)
+        for (const key in newObj) {
+            var element = newObj[key];
+            if (typeof element == "string") {
+                if (element.length == 0) {
+                    delete newObj[key];
+                }
+            }
+            if (!element) {
+                delete newObj[key];
+            }
+        }
+        return newObj;
+    };
+    window.clShopifyTrack = function(){
+        {% unless post_purchase_page_accessed %}
+            {% if first_time_accessed %}
+                var products = []
+                {% for line_item in checkout.line_items %}
+                    
+                    products.push({
+                        'product_id': {"t": "string", "v": {{line_item.product_id | json}}},
+                        'product_sku': {"t": "string", "v": {{line_item.sku | json}}},
+                        'product_variant': {"t": "string", "v": {{line_item.variant_id | json}}},
+                        'product_name': {"t": "string", "v": {{line_item.title | json}}},
+                        'product_type': {"t": "string", "v": {{line_item.product.type | json}}},
+                        'product_price': {"t": "string", 
+                            "v": '{{shop.money_format}}'.includes('with_comma_separator') ? {{line_item.price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{line_item.price | money_without_currency | remove: "," | json}}
+                        },
+                        'product_quantity':{"t": "string", "v": {{line_item.quantity | json}}}
+                    });
+                        
+                {% endfor %}
+                var transactionData = {
+                    'transaction_number'      : {'t': 'string', 'v': {{checkout.order_id | json}} },
+                    'transaction_id'          : {'t': 'string', 'v': {{checkout.order_number | json}} },
+                    'transaction_affiliation' : {'t': 'string', 'v': {{shop.name | json}} },
+                    'transaction_total'       : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.total_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.total_price | money_without_currency | remove: "," | json}} },
+                    'tax'         : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.tax_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.tax_price | money_without_currency | remove: "," | json}} },
+                    'shipping'    : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.shipping_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.shipping_price | money_without_currency | remove: "," | json}} },
+                    'subtotal'    : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.subtotal_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.subtotal_price | money_without_currency | remove: "," | json}} },
+                    {% for discount in checkout.discounts %}
+                    'promo_code' : {'t': 'string', 'v': {{discount.code | json}} },
+                    'discount'  : {'t': 'number', 'v': {{discount.amount | money_without_currency | json}} },
+                    {% endfor %}
+                };
+                            
+                transactionData["content_type"] = {"t": "string", "v": "product_group"};
+                transactionData["currency"] = {"t": "string", "v": {{ checkout.currency | json}}};
+                
+                /*
+                * If you want the purchase value to be without shipping cost,
+                * Just replace `checkout.total_price` with `checkout.subtotal_price` in below line
+                */
+                transactionData["value"] = {"t": "number", "v": Number('{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.total_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.total_price | money_without_currency | remove: "," | json}})};
+                
+                var propertiesToSend = {
+                    'customProperties': transactionData,
+                    'productProperties': products
+                };
+                setTimeout(function(){
+                    if(transactionData.transaction_number && transactionData.transaction_number.v && window.localStorage){
+                        var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
+                        var purchases = JSON.parse(purchases_str);
+                        if(!purchases[transactionData.transaction_number.v]){
+                            _cl.trackClick('Purchased', propertiesToSend);
+                            purchases[transactionData.transaction_number.v] = "true";
+                            window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
+                        }
+                    }else{
+                        _cl.trackClick('Purchased', propertiesToSend);
+                    }
+                }, 3000)
+                var checkout_billing_address = clearObject({{checkout.billing_address | json}} || {});
+                var checkout_shipping_address = clearObject({{checkout.shipping_address | json}} || {});
+                var order_billing_address = clearObject({{order.billing_address | json}} || {});
+                var order_shipping_address = clearObject({{order.shipping_address | json}} || {});
+
+                var checkout_address = Object.assign({}, checkout_billing_address, checkout_shipping_address);
+                var order_address = Object.assign({}, order_billing_address, order_shipping_address);
+
+
+                var cltraits = Object.assign({}, checkout_address, order_address);
+
+                cltraits["email"] = {{order.email | json}} || {{checkout.email | json}};
+
+                if(cltraits["email"]){
+                    var user_traits = {}
+                    for(var trait in cltraits){
+                        if(cltraits[trait]){
+                            user_traits[trait] = {
+                                "t": "string",
+                                "v": cltraits[trait]
+                            }
+                        }
+                    }
+                    var props = {
+                        "customProperties": {
+                            "user_traits": {
+                                "t": "Object",
+                                "v": user_traits
+                            },
+                            "identify_by_email": {
+                                "t":"string",
+                                "v": cltraits["email"],
+                                "ib": true
+                            }
+                        }
+                    }
+                    _cl.identify(props)
+                }
+            {% endif %}
+        {% endunless %}
+            
+    }
+</script>
+<!-- End of Pixelboom Tag -->
+
+
+
+
+
+
+Place the next code in the post purchase page addtinal scripts
+
+<!-- Pixelboom Tag --><script>!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)};n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.pixelboom.co/cl44961zb0idem.js","_cl");_cl.SNIPPET_VERSION="1.0.0"</script>
+<script id="cl_additional_post_purchase_script" type="text/javascript">
+    window.clShopifyTrack = function(){
+        if (!window.Shopify.wasPostPurchasePageSeen) {        
+            var order = window.Shopify.order;
+            var products = order.lineItems.map(function(item){
+                return {
+                    "product_id": Number(item.id).toString(),
+                    "product_name": item.title,
+                    "product_category": item.product.type,
+                    "product_price": item.price,
+                    "product_quantity": item.quantity,
+                    "product_variant": Number(item.variant.sku).toString()
+                }
+            });
+            var propertiesToSend = {
+                "customProperties": {
+                    "transaction_number": {
+                        "t": "string",
+                        "v": Number(order.id).toString(),
+                    },
+                    "value": {
+                        "t": "number",
+                        "v": order.totalPrice
+                    },
+                    "currency": {
+                        "t": "string",
+                        "v": order.currency
+                    }
+                },
+                "productProperties": products
+            }
+
+            var transaction_number = Number(order.id).toString()
+
+            if(transaction_number && window.localStorage){
+                var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
+                var purchases = JSON.parse(purchases_str);
+                if(!purchases[transaction_number]){
+                    _cl.trackClick('Purchased', propertiesToSend);
+                    purchases[transaction_number] = "true";
+                    window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
+                }
+            }else{
+                _cl.trackClick('Purchased', propertiesToSend);
+            }
+            var cltraits = order.customer;
+            if(cltraits["email"]){
+                var user_traits = {}
+                for(var trait in cltraits){
+                    if(cltraits[trait]){
+                        user_traits[trait] = {
+                            "t": "string",
+                            "v": cltraits[trait]
+                        }
+                    }
+                }
+                var props = {
+                    "customProperties": {
+                        "user_traits": {
+                            "t": "Object",
+                            "v": user_traits
+                        },
+                        "identify_by_email": {
+                            "t":"string",
+                            "v": cltraits["email"],
+                            "ib": true
+                        }
+                    }
+                }
+                _cl.identify(props)
+            }
+
+        }
+
+        Shopify.on('CheckoutAmended', function(newOrder, previousOrder) {
+            // identify which items were recently added, if any
+            var oldItems = previousOrder.lineItems.map(function (line) { 
+                return line.id; 
+            });
+
+            var addedItems = newOrder.lineItems.filter(function (line) { 
+                return oldItems.indexOf(line.id) < 0; 
+            });
+
+            // no new items were added, so we skip conversion tracking
+            if (addedItems.length === 0) {
+                return;
+            }
+
+            var order = newOrder;
+            var products = addedItems.map(function(item){
+                return {
+                    "product_id": Number(item.id).toString(),
+                    "product_name": item.title,
+                    "product_category": item.product.type,
+                    "product_price": item.price,
+                    "product_quantity": item.quantity,
+                    "product_variant": Number(item.variant.sku).toString()
+                };
+            });
+            var propertiesToSend = {
+                "customProperties": {
+                    "transaction_number": {
+                        "t": "string",
+                        "v": Number(order.id).toString(),
+                    },
+                    "value": {
+                        "t": "number",
+                        "v": order.totalPrice
+                    },
+                    "currency": {
+                        "t": "string",
+                        "v": order.currency
+                    }
+                },
+                "productProperties": products
+            }
+            _cl.trackClick("Purchased", propertiesToSend);
+            
+            var cltraits = order.customer;
+            if(cltraits["email"]){
+                var user_traits = {}
+                for(var trait in cltraits){
+                    if(cltraits[trait]){
+                        user_traits[trait] = {
+                            "t": "string",
+                            "v": cltraits[trait]
+                        }
+                    }
+                }
+                var props = {
+                    "customProperties": {
+                        "user_traits": {
+                            "t": "Object",
+                            "v": user_traits
+                        },
+                        "identify_by_email": {
+                            "t":"string",
+                            "v": cltraits["email"],
+                            "ib": true
+                        }
+                    }
+                }
+                _cl.identify(props)
+            }  
+        });
+
+    }
+</script>
+<!-- End of Pixelboom Tag -->
