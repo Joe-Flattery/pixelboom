@@ -1,5 +1,8 @@
-Place This first file inside of Customer Events
+There are 3 codes on this page that need to go in 3 different locations inside of shopify. All can be accessed by goingto settings and then either checkout & accounts or to custoemr events
 
+
+Place This first code inside of Customer Events 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * Pixelboom Tracking code - Custom pixel code for shopify 
 * */
@@ -369,7 +372,7 @@ window.clShopifyTrack = function() {
 
 
 Place the Next code in the Order Status Page additional scripts
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 <!-- Pixelboom Tag --><script>!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)};n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.pixelboom.co/cl4690gkdldyat.js","_cl");_cl.SNIPPET_VERSION="1.0.0"</script>
 <script id="cl_additional_order_status_script" type="text/javascript">
     var clearObject = function(obj){
@@ -497,7 +500,7 @@ Place the Next code in the Order Status Page additional scripts
 
 
 Place the next code in the post purchase page addtinal scripts
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 <!-- Pixelboom Tag --><script>!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)};n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.pixelboom.co/cl4690gkdldyat.js","_cl");_cl.SNIPPET_VERSION="1.0.0"</script>
 <script id="cl_additional_post_purchase_script" type="text/javascript">
     window.clShopifyTrack = function(){
